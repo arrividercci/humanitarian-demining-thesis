@@ -121,13 +121,16 @@ class RoutePlannerTest {
         RiskGrid grid = new RiskGrid(5, 5, 1.0, 0.0, 0.0);
         RoutePlanner planner = new RoutePlanner(grid, 1.0, 0.0, 0.0);
 
-        // Найпривабливіша клітинка -- (2,2): найвищий ризик і невизначеність
-        grid.update(2, 2, 0.95, 0.9, 1L);
-        grid.update(1, 1, 0.5, 0.4, 2L);
+        // Будь-яке спостереження лише зменшує H(risk)*uncertainty для тієї ж
+        // відстані (формула 3.3) - тож клітинка (2,2), яка лишається зовсім
+        // необстеженою і точно збігається з позицією p (нульова відстань),
+        // гарантовано найкорисніша серед усіх кандидатів.
+        grid.update(1, 1, 0.5, 0.4, 1L);
+        grid.update(3, 3, 0.6, 0.3, 2L);
 
-        RoutePlanner.Point p = new RoutePlanner.Point(2.5, 2.5);
+        RoutePlanner.Point p = new RoutePlanner.Point(2.5, 2.5); // точний центр клітинки (2,2)
 
-        // Без виключень планувальник обирає (2,2)
+        // Без виключень планувальник обирає (2,2) - свіжу клітинку з нульовою відстанню
         RoutePlanner.TargetResult unrestricted = planner.selectNextTarget(p, 10.0, 0.1);
         assertEquals(2, unrestricted.i());
         assertEquals(2, unrestricted.j());

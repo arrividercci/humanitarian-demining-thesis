@@ -1,0 +1,8 @@
+=== 2026-09-20T10:57:54.859643300Z ===
+args: --seeds 3 --delays 0 --min-gain 0.001 --out pilot_mg001.csv
+cpu_logical_cores: 12
+java: 25.0.4 (OpenJDK 64-Bit Server VM)
+os: Windows 11 10.0 amd64
+max_heap_mb: 7980
+onnx_intra_op_threads: 1
+

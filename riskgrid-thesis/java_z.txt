@@ -1,0 +1,40 @@
+﻿=== ╨Ч╨╛╨▒╤А╨░╨╢╨╡╨╜╨╜╤П ╨╖ ╨╝╤Ц╨╜╨░╨╝╨╕ ===
+  terrain-images\mine\DM-11_43_png.rf.0f60d5971128c076b1ed9a3a114580f5.jpg  ->  z (Java) = 0,9353
+  terrain-images\mine\FlightAltitude__0-7m_TemperatureInCenter__28-C_jpg.rf.d784d3a3ea608b119adf51478bad9c99.jpg  ->  z (Java) = 0,8566
+  terrain-images\mine\FlightAltitude__0-7m_TemperatureInCenter__30-C_jpg.rf.6f6184c32654580a9c36dffd7cfd777c.jpg  ->  z (Java) = 0,6974
+  terrain-images\mine\FlightAltitude__0-7m_TemperatureInCenter__33-C_jpg.rf.62d23ef1ca8abe4963557dcc3c5d8a00.jpg  ->  z (Java) = 0,3474
+  terrain-images\mine\FlightAltitude__0-7m_TemperatureInCenter__33-C_jpg.rf.dcc3ec57ff255896e012763cbcae5b08.jpg  ->  z (Java) = 0,4901
+  terrain-images\mine\FlightAltitude__1-8m_TemperatureInCenter__25-C_jpg.rf.5bda76c4debcf4776ab581c704e65fd0.jpg  ->  z (Java) = 0,3110
+  terrain-images\mine\FlightAltitude__10-m_TemperatureInCenter__25-C_jpg.rf.e2ce107cc320aa482c97db2b95cce992.jpg  ->  z (Java) = 0,6295
+  terrain-images\mine\FlightAltitude__10-m_TemperatureInCenter__34-C_jpg.rf.bbf6e83812a9a7534da6499af8b9ba56.jpg  ->  z (Java) = 0,2667
+  terrain-images\mine\FlightAltitude__2-0m_TemperatureInCenter__40-C_jpg.rf.6b696c3c041a3abf9a260c793097d920.jpg  ->  z (Java) = 0,4000
+  terrain-images\mine\FlightAltitude__2-7m_TemperatureInCenter__38-C_jpg.rf.4432c066da4bb5a2fdb3d7e81edf8a5c.jpg  ->  z (Java) = 0,4170
+  terrain-images\mine\FlightAltitude__3-2m_TemperatureInCenter__26-C_jpg.rf.4bf2a0e453f5729ae67a125cf64dc855.jpg  ->  z (Java) = 0,4102
+  terrain-images\mine\FlightAltitude__3-3m_TemperatureInCenter__27-C_jpg.rf.3f5fb86b263074a1e3dea2a717279f9c.jpg  ->  z (Java) = 0,7117
+  terrain-images\mine\FlightAltitude__6-8m_TemperatureInCenter__30-C_jpg.rf.910cbcdbdc17142dc9fcf1305aba7678.jpg  ->  z (Java) = 0,6009
+  terrain-images\mine\FlightAltitude__8-0m_TemperatureInCenter__38-C_jpg.rf.662af62954b98f20541e46c98f7afe85.jpg  ->  z (Java) = 0,5194
+  terrain-images\mine\FlightAltitude__8-0m_TemperatureInCenter__40-C_jpg.rf.552a9fddb412c76324293c188701f984.jpg  ->  z (Java) = 0,7858
+  terrain-images\mine\FlightAltitude__8-1m_TemperatureInCenter__27-C_jpg.rf.6185b45b9091ba6a1889d485b9aca9d0.jpg  ->  z (Java) = 0,2517
+  terrain-images\mine\FlightAltitude__8-9m_TemperatureInCenter__30-C_jpg.rf.1c7c971a435d131cf25fe71c10eacec1.jpg  ->  z (Java) = 0,0000
+  terrain-images\mine\illia_1_day_1_00-15_png.rf.c27b607f2ffbf564c5c3b047d6e475bd.jpg  ->  z (Java) = 0,8749
+  terrain-images\mine\illia_1_day_2_00-30_png.rf.545e37a05e93a404d428fdd661543c5e.jpg  ->  z (Java) = 0,7967
+  terrain-images\mine\illia_1_day_3_07-45_png.rf.d0f2074d2d8a35e884e5d03c4ba151bc.jpg  ->  z (Java) = 0,7964
+
+=== ╨д╨╛╨╜╨╛╨▓╤Ц ╨╖╨╛╨▒╤А╨░╨╢╨╡╨╜╨╜╤П ===
+  terrain-images\background\FlightAltitude__0-6m_TemperatureInCenter__28-C_jpg.rf.3c0b666dea6fe13f225322afb3d92afd.jpg  ->  z (Java) = 0,0000
+  terrain-images\background\FlightAltitude__0-7m_TemperatureInCenter__28-C_jpg.rf.bdbb1bef6df1a6e3236694719cad47c6.jpg  ->  z (Java) = 0,0000
+  terrain-images\background\FlightAltitude__1-3m_TemperatureInCenter__33-C_jpg.rf.ab835ff63e3d5d4ec54c61138386fe4a.jpg  ->  z (Java) = 0,0000
+  terrain-images\background\FlightAltitude__1-4m_TemperatureInCenter__33-C_jpg.rf.17b35e83bcf734c279fbf71a75a93a51.jpg  ->  z (Java) = 0,0000
+  terrain-images\background\FlightAltitude__2-4m_TemperatureInCenter__30-C_jpg.rf.552474ca3422e05c8d365d1a141e8799.jpg  ->  z (Java) = 0,0000
+  terrain-images\background\FlightAltitude__3-1m_TemperatureInCenter__29-C_jpg.rf.37a4dae74627817ed5a0647b0c978c98.jpg  ->  z (Java) = 0,0000
+  terrain-images\background\FlightAltitude__3-3m_TemperatureInCenter__32-C_jpg.rf.addad4737e655ecd961f5a2d05ddf3de.jpg  ->  z (Java) = 0,0000
+  terrain-images\background\FlightAltitude__3-8m_TemperatureInCenter__34-C_jpg.rf.991ffc52257dd1f11101d8e63b29283e.jpg  ->  z (Java) = 0,0000
+  terrain-images\background\FlightAltitude__4-7m_TemperatureInCenter__26-C_jpg.rf.6272162501aff237a4a9a54e1eaab93a.jpg  ->  z (Java) = 0,0000
+  terrain-images\background\FlightAltitude__5-0m_TemperatureInCenter__34-C_jpg.rf.75a1bd0df34ca4cec3123809a667fc54.jpg  ->  z (Java) = 0,4269
+  terrain-images\background\FlightAltitude__7-2m_TemperatureInCenter__34-C_jpg.rf.90cab8ca51c9fe1fc22416659efa6d20.jpg  ->  z (Java) = 0,0000
+  terrain-images\background\FlightAltitude__7-9m_TemperatureInCenter__26-C_jpg.rf.ee1cb36d8270a4ba2ffd7fbcadeb63c8.jpg  ->  z (Java) = 0,0000
+  terrain-images\background\FlightAltitude__9-0m_TemperatureInCenter__32-C_jpg.rf.580fcc0688a0cfe58294a1b56d9ca3c9.jpg  ->  z (Java) = 0,0000
+
+╨в╨╡╨┐╨╡╤А ╨╖╨░╨┐╤Г╤Б╤В╨╕ ╨┤╨╗╤П ╨в╨Ш╨е ╨б╨Р╨Ь╨Ш╨е ╤Д╨░╨╣╨╗╤Ц╨▓ (╤И╨╗╤П╤Е╨╕ ╨▓╨╕╤Й╨╡):
+  python mine_detector.py weights/best.pt <╤И╨╗╤П╤Е_╨┤╨╛_╤Д╨░╨╣╨╗╤Г>
+╤Ц ╨╖╨▓╤Ц╤А Suspicion score z ╨╖ ╤В╨╕╨╝, ╤Й╨╛ ╨╜╨░╨┤╤А╤Г╨║╨╛╨▓╨░╨╜╨╛ ╨▓╨╕╤Й╨╡.

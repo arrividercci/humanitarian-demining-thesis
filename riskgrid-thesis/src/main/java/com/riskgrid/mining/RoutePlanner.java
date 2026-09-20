@@ -21,26 +21,49 @@ public class RoutePlanner {
     /** Результат вибору цілі: координати клітинки + діагностична інформація. */
     public record TargetResult(int i, int j, int candidatesEvaluated) {}
 
+    /**
+     * Прямокутна область карти (індекси клітинок, межі включно). Використовується
+     * для статичного розбиття на сектори: планувальник з областю розглядає
+     * кандидатів лише всередині неї.
+     */
+    public record Region(int iMin, int iMax, int jMin, int jMax) {
+        public int size() {
+            return (iMax - iMin + 1) * (jMax - jMin + 1);
+        }
+    }
+
     private final RiskGrid grid;
     private final double cellSize;
     private final double originX;
     private final double originY;
+    private final Region region; // null = вся карта
 
     public RoutePlanner(RiskGrid grid, double cellSize, double originX, double originY) {
+        this(grid, cellSize, originX, originY, null);
+    }
+
+    /** Планувальник, обмежений областю (для статичних секторів); region = null - вся карта. */
+    public RoutePlanner(RiskGrid grid, double cellSize, double originX, double originY, Region region) {
         this.grid = grid;
         this.cellSize = cellSize;
         this.originX = originX;
         this.originY = originY;
+        this.region = region;
+    }
+
+    /** Область, якою обмежений планувальник (null - вся карта). */
+    public Region getRegion() {
+        return region;
     }
 
     /** Фізична координата центру клітинки (i, j) - обернена до формули 2.2. */
-    private Point cellCenter(int i, int j) {
+    public Point cellCenter(int i, int j) {
         double x = originX + (i + 0.5) * cellSize;
         double y = originY + (j + 0.5) * cellSize;
         return new Point(x, y);
     }
 
-    private double dist(Point a, Point b) {
+    public double dist(Point a, Point b) {
         double dx = a.x() - b.x();
         double dy = a.y() - b.y();
         return Math.sqrt(dx * dx + dy * dy);
@@ -51,7 +74,7 @@ public class RoutePlanner {
      * H(risk) - ентропія Бернуллі (максимальна при risk=0.5, нуль при risk->0 або 1) -
      * інформаційний виграш, λ*dist - штраф за відстань.
      */
-    private double utility(int i, int j, Point p, double lambda) {
+    public double utility(int i, int j, Point p, double lambda) {
         double risk = grid.getRisk(i, j);
         double unc = grid.getUncertainty(i, j);
         double informationGain = binaryEntropy(risk) * unc;
@@ -77,7 +100,7 @@ public class RoutePlanner {
      *         з кількістю оцінених кандидатів
      */
     public TargetResult selectNextTarget(Point p, double radius, double lambda) {
-        return selectNextTarget(p, radius, lambda, Collections.emptySet(), 6);
+        return selectNextTarget(p, radius, lambda, Collections.emptySet(), 0.0, 0, 6);
     }
 
     /**
@@ -89,11 +112,47 @@ public class RoutePlanner {
      * очікується у вигляді пакованих ключів (див. DroneCoordinator.cellKey).
      */
     public TargetResult selectNextTarget(Point p, double radius, double lambda, Set<Long> excludedCells) {
-        return selectNextTarget(p, radius, lambda, excludedCells, 6);
+        return selectNextTarget(p, radius, lambda, excludedCells, 0.0, 0, 6);
+    }
+
+    /**
+     * Те саме, але клітинки з інформаційним виграшем H(risk)*uncertainty
+     * нижче minInformationGain вважаються "вичерпаними" і не розглядаються
+     * як кандидати. Якщо таких кандидатів у радіусі не лишилось - радіус
+     * подвоюється (як і в описі методу), тож дрон не застрягає на повторних
+     * обробках клітинок, навколо яких уже все обстежено.
+     * minInformationGain = 0 відтворює початкову поведінку.
+     */
+    public TargetResult selectNextTarget(Point p, double radius, double lambda, Set<Long> excludedCells,
+                                          double minInformationGain) {
+        return selectNextTarget(p, radius, lambda, excludedCells, minInformationGain, 0, 6);
+    }
+
+    /**
+     * Те саме, що попередній варіант, але клітинки, які вже спостерігались
+     * maxObservationsPerCell разів (RiskGrid.getObservationCount), не є
+     * кандидатами. Це гарантує скінченність обстеження: кожна клітинка
+     * обробляється не більше maxObservationsPerCell разів, тож загальна
+     * кількість спостережень не перевищує maxObservationsPerCell * rows * cols
+     * (за умови, що захоплення клітинок увімкнене - див. DroneAgent).
+     * Клітинки без жодного спостереження завжди лишаються кандидатами,
+     * тож дрон, у якого в радіусі все вичерпано, розширює радіус і йде до них.
+     * maxObservationsPerCell = 0 вимикає обмеження.
+     */
+    public TargetResult selectNextTarget(Point p, double radius, double lambda, Set<Long> excludedCells,
+                                          double minInformationGain, int maxObservationsPerCell) {
+        return selectNextTarget(p, radius, lambda, excludedCells, minInformationGain,
+                maxObservationsPerCell, 6);
+    }
+
+    /** Інформаційний виграш клітинки (складник корисності без штрафу за відстань). */
+    public double informationGain(int i, int j) {
+        return binaryEntropy(grid.getRisk(i, j)) * grid.getUncertainty(i, j);
     }
 
     private TargetResult selectNextTarget(Point p, double radius, double lambda,
-                                           Set<Long> excludedCells, int maxDoublings) {
+                                           Set<Long> excludedCells, double minInformationGain,
+                                           int maxObservationsPerCell, int maxDoublings) {
         int[] pCellIdx = grid.toCellIndex(p.x(), p.y());
         int cellRadius = (int) Math.ceil(radius / cellSize);
 
@@ -105,6 +164,12 @@ public class RoutePlanner {
         int iMax = Math.min(grid.getRows() - 1, pCellIdx[0] + cellRadius);
         int jMin = Math.max(0, pCellIdx[1] - cellRadius);
         int jMax = Math.min(grid.getCols() - 1, pCellIdx[1] + cellRadius);
+        if (region != null) { // статичний сектор: кандидати лише всередині області
+            iMin = Math.max(iMin, region.iMin());
+            iMax = Math.min(iMax, region.iMax());
+            jMin = Math.max(jMin, region.jMin());
+            jMax = Math.min(jMax, region.jMax());
+        }
 
         for (int i = iMin; i <= iMax; i++) {
             for (int j = jMin; j <= jMax; j++) {
@@ -114,6 +179,8 @@ public class RoutePlanner {
 
                 Point center = cellCenter(i, j);
                 if (dist(center, p) > radius) continue;
+                if (minInformationGain > 0.0 && informationGain(i, j) < minInformationGain) continue;
+                if (maxObservationsPerCell > 0 && grid.getObservationCount(i, j) >= maxObservationsPerCell) continue;
 
                 candidatesEvaluated++;
                 double u = utility(i, j, p, lambda);
@@ -129,7 +196,8 @@ public class RoutePlanner {
             if (maxDoublings <= 0) {
                 throw new IllegalStateException("Не знайдено жодного кандидата навіть після розширення радіусу");
             }
-            return selectNextTarget(p, radius * 2, lambda, excludedCells, maxDoublings - 1);
+            return selectNextTarget(p, radius * 2, lambda, excludedCells, minInformationGain,
+                    maxObservationsPerCell, maxDoublings - 1);
         }
 
         return new TargetResult(bestI, bestJ, candidatesEvaluated);

@@ -1,0 +1,12 @@
+names:
+- landmine
+nc: 1
+roboflow:
+  license: CC BY 4.0
+  project: mineguard-thermal
+  url: https://universe.roboflow.com/dronecv/mineguard-thermal/dataset/15
+  version: 15
+  workspace: dronecv
+test: ../test/images
+train: ../train/images
+val: ../valid/images

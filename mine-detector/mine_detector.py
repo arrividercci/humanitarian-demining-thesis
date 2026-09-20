@@ -54,6 +54,7 @@ class MineDetector:
             source=image,
             conf=self.conf_threshold,
             verbose=False,
+            device="cpu",  # ROCm/HIP на AMD GPU нестабільний (задокументована проблема) - примусово CPU
         )
 
         # results — список (по одному елементу на кожен вхідний кадр);
@@ -77,6 +78,7 @@ class MineDetector:
             source=image,
             conf=self.conf_threshold,
             verbose=False,
+            device="cpu",  # ROCm/HIP на AMD GPU нестабільний (задокументована проблема) - примусово CPU
         )
         boxes = results[0].boxes
         if boxes is None:

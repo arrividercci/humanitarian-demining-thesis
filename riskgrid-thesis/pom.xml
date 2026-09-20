@@ -16,9 +16,17 @@
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Дефолт для "mvn exec:java" без параметра - пакетне порівняння 1/2/4/8 дронів.
+         Перевизначається з командного рядка: mvn exec:java "-Dexec.mainClass=com.riskgrid.mining.DemoApp" -->
+    <exec.mainClass>com.riskgrid.mining.Main</exec.mainClass>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>com.microsoft.onnxruntime</groupId>
+      <artifactId>onnxruntime</artifactId>
+      <version>1.18.0</version>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -71,5 +79,15 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <mainClass>${exec.mainClass}</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 </project>
