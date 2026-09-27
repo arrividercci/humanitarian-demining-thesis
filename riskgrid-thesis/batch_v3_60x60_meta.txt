@@ -1,0 +1,8 @@
+=== 2026-09-23T23:46:56.483348600Z ===
+args: --rows 60 --cols 60 --clusters 12 --cluster-radius 4 --seeds 5 --drones 1,2,4,6,8 --delays 20 --min-gain 0.2 --max-obs 3 --timeout-min 20 --out batch_v3_60x60.csv
+cpu_logical_cores: 12
+java: 25.0.4 (OpenJDK 64-Bit Server VM)
+os: Windows 11 10.0 amd64
+max_heap_mb: 7980
+onnx_intra_op_threads: 1
+

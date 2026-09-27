@@ -60,6 +60,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *                        динамічний метод (захоплення клітинок) і базовий метод - статичні
  *                        сектори (без захоплення); режим "без захоплення" не запускається.
  *                        У CSV: сектори мають partition = 1 і claiming = 0
+ *   --no-augmentation    вимкнути стохастичну аугментацію повторних спостережень (SimulatedTerrain);
+ *                        за замовчуванням увімкнена (кожен візит - трансформована копія кадру)
+ *   --slow-half K        сценарій неоднорідних дронів: половина дронів (id 0 .. n/2 - 1, тобто
+ *                        для n = 2, 4, 6, 8 це 1, 2, 3, 4 дрони) працює в K разів повільніше
+ *                        (K > 1). Для 1 дрона повільних немає, тож еталон лишається нормальним.
+ *                        Діє однаково для динамічного методу й секторів. У CSV колонка slow_factor
  *   --max-obs N          максимум спостережень на клітинку (0 = вимкнено); гарантує
  *                        скінченність: кроків не більше N * rows * cols (із захопленням)
  *   --timeout-min M      ліміт часу на один запуск (типово 15)
@@ -78,7 +84,7 @@ public final class ExperimentBatch {
             "seed", "rows", "cols", "drones", "claiming", "travel_delay_ms", "elapsed_ms", "complete",
             "steps", "unique_cells", "revisits", "stale_revisits", "claim_failures", "concurrent_duplicates", "fallback_jumps",
             "decisions", "lat_mean_ms", "lat_p50_ms", "lat_p95_ms", "lat_p99_ms", "lat_max_ms",
-            "total_mines", "accuracy", "precision", "recall", "f1", "risk_mae_vs_seq", "threshold", "min_gain", "max_obs", "cap_rejections", "partition", "idle_fraction");
+            "total_mines", "accuracy", "precision", "recall", "f1", "risk_mae_vs_seq", "threshold", "min_gain", "max_obs", "cap_rejections", "partition", "idle_fraction", "slow_factor", "augmentation");
 
     /** Результат одного запуску. */
     private record RunOutcome(double elapsedMs, boolean complete, int steps, int uniqueCells,
@@ -99,6 +105,8 @@ public final class ExperimentBatch {
         double minGain = 0.0; // 0 = початкова поведінка планувальника
         int maxObs = 0;       // 0 = без обмеження спостережень на клітинку
         boolean withSectors = false; // true = додатково запускати базовий метод: статичні сектори
+        double slowHalf = 1.0;       // > 1: перша половина дронів (id < n/2) працює в стільки разів повільніше
+        boolean noAugmentation = false; // true = вимкнути стохастичну аугментацію (регресія/чутливість)
         int timeoutMin = 15;
         double maxStepsFactor = 4.0; // ліміт кроків = factor * rows * cols; далі запуск вважається незавершеним
         boolean warmup = true;
@@ -113,6 +121,7 @@ public final class ExperimentBatch {
                 String key = a[k];
                 if (key.equals("--no-warmup")) { c.warmup = false; continue; }
                 if (key.equals("--with-sectors")) { c.withSectors = true; continue; }
+                if (key.equals("--no-augmentation")) { c.noAugmentation = true; continue; }
                 if (k + 1 >= a.length) throw new IllegalArgumentException("Немає значення для " + key);
                 String v = a[++k];
                 switch (key) {
@@ -130,6 +139,7 @@ public final class ExperimentBatch {
                     case "--threshold" -> c.threshold = Double.parseDouble(v);
                     case "--min-gain" -> c.minGain = Double.parseDouble(v);
                     case "--max-obs" -> c.maxObs = Integer.parseInt(v);
+                    case "--slow-half" -> c.slowHalf = Double.parseDouble(v);
                     case "--timeout-min" -> c.timeoutMin = Integer.parseInt(v);
                     case "--max-steps-factor" -> c.maxStepsFactor = Double.parseDouble(v);
                     case "--out" -> c.out = v;
@@ -188,8 +198,10 @@ public final class ExperimentBatch {
     /** Усі конфігурації для одного seed на одній території. Повертає готові CSV-рядки. */
     private static List<String> runSeed(Config c, MineDetectorOnnx detector, long seed,
                                          List<String> mapLines, List<String> truthLines) throws Exception {
+        SimulatedTerrain.AugmentationConfig augCfg = c.noAugmentation
+                ? SimulatedTerrain.AugmentationConfig.disabled() : SimulatedTerrain.AugmentationConfig.defaults();
         SimulatedTerrain terrain = new SimulatedTerrain(c.rows, c.cols, c.mineDir, c.bgDir,
-                c.clusters, c.clusterRadius, seed);
+                c.clusters, c.clusterRadius, seed, augCfg);
         int maxDrones = c.droneCounts[c.droneCounts.length - 1];
         int[][] starts = generateStartCells(maxDrones, c.rows, c.cols, seed * 1_000_003L + 999L);
         int totalMines = countMines(terrain, c.rows, c.cols);
@@ -248,6 +260,10 @@ public final class ExperimentBatch {
         final boolean useSectors = sectorMode;
         DroneAgent.Options opts = new DroneAgent.Options(useSectors ? false : claiming, delayMsPerUnit,
                 monitor, c.minGain, c.maxObs);
+        // Сценарій із повільними дронами: перша половина дронів (id < n/2) працює в c.slowHalf разів
+        // повільніше. Для 1 дрона n/2 = 0, тож еталонний запуск лишається нормальним.
+        DroneAgent.Options slowOpts = new DroneAgent.Options(useSectors ? false : claiming, delayMsPerUnit,
+                monitor, c.minGain, c.maxObs, c.slowHalf);
 
         // Секторний режим: кожен дрон отримує власний планувальник, обмежений його сектором.
         List<RoutePlanner.Region> sectors = null;
@@ -265,7 +281,8 @@ public final class ExperimentBatch {
                     ? new RoutePlanner(grid, CELL_SIZE, ORIGIN, ORIGIN, sectors.get(sectorOf[d]))
                     : planner;
             agents.add(new DroneAgent(d, grid, dronePlanner, coordinator, coverage, terrain, detector,
-                    start, c.searchRadius, c.lambda, c.weight, null, t0, stop, opts));
+                    start, c.searchRadius, c.lambda, c.weight, null, t0, stop,
+                    (d < droneCount / 2 && c.slowHalf > 1.0) ? slowOpts : opts));
         }
 
         ExecutorService executor = Executors.newFixedThreadPool(droneCount);
@@ -355,7 +372,9 @@ public final class ExperimentBatch {
     private static void warmup(Config c, MineDetectorOnnx detector) throws Exception {
         System.out.println("Прогрів (результати не записуються)...");
         int wr = 12, wc = 12;
-        SimulatedTerrain t = new SimulatedTerrain(wr, wc, c.mineDir, c.bgDir, 1, 2.0, 0L);
+        SimulatedTerrain.AugmentationConfig warmupAug = c.noAugmentation
+                ? SimulatedTerrain.AugmentationConfig.disabled() : SimulatedTerrain.AugmentationConfig.defaults();
+        SimulatedTerrain t = new SimulatedTerrain(wr, wc, c.mineDir, c.bgDir, 1, 2.0, 0L, warmupAug);
         int[][] starts = generateStartCells(c.droneCounts[c.droneCounts.length - 1], wr, wc, 12345L);
         for (int pass = 0; pass < 2; pass++) {
             for (int n : c.droneCounts) {
@@ -374,13 +393,14 @@ public final class ExperimentBatch {
         long[] lat = o.latenciesNanos;
         double mean = lat.length == 0 ? Double.NaN : Arrays.stream(lat).average().orElse(Double.NaN) / 1e6;
         return String.format(Locale.US,
-                "%d,%d,%d,%d,%d,%.1f,%.3f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.5f,%.5f,%.5f,%.5f,%.5f,%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.3f,%.6f,%d,%d,%d,%.5f",
+                "%d,%d,%d,%d,%d,%.1f,%.3f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.5f,%.5f,%.5f,%.5f,%.5f,%d,%.6f,%.6f,%.6f,%.6f,%.6f,%.3f,%.6f,%d,%d,%d,%.5f,%.2f,%d",
                 seed, c.rows, c.cols, drones, claiming ? 1 : 0, delay, o.elapsedMs, o.complete ? 1 : 0,
                 o.steps, o.uniqueCells, o.revisits, o.staleRevisits, o.claimFailures, o.conflicts, o.fallbackJumps,
                 lat.length, mean, pct(lat, 0.50), pct(lat, 0.95), pct(lat, 0.99),
                 lat.length == 0 ? Double.NaN : lat[lat.length - 1] / 1e6,
                 totalMines, o.metrics.accuracy(), o.metrics.precision(), o.metrics.recall(), o.metrics.f1(),
-                mae, c.threshold, c.minGain, c.maxObs, o.capRejections, sectorMode ? 1 : 0, o.idleFraction);
+                mae, c.threshold, c.minGain, c.maxObs, o.capRejections, sectorMode ? 1 : 0, o.idleFraction,
+                drones > 1 ? Math.max(1.0, c.slowHalf) : 1.0, c.noAugmentation ? 0 : 1);
     }
 
     /** Перцентиль (метод найближчого рангу) у мс; масив уже відсортований. */

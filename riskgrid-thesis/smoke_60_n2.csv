@@ -1,0 +1,4 @@
+seed,rows,cols,drones,claiming,travel_delay_ms,elapsed_ms,complete,steps,unique_cells,revisits,stale_revisits,claim_failures,concurrent_duplicates,fallback_jumps,decisions,lat_mean_ms,lat_p50_ms,lat_p95_ms,lat_p99_ms,lat_max_ms,total_mines,accuracy,precision,recall,f1,risk_mae_vs_seq,threshold,min_gain,max_obs,cap_rejections,partition,idle_fraction,slow_factor,augmentation
+1,60,60,1,1,20.0,298600.363,1,3600,3600,0,0,0,0,0,3600,0.02180,0.01670,0.03990,0.06940,0.83110,534,0.961111,0.973558,0.758427,0.852632,0.000000,0.500,0.200000,3,0,0,0.00000,1.00,1
+1,60,60,2,1,20.0,218709.795,1,4514,3600,914,0,0,0,0,4514,0.02095,0.01690,0.03800,0.07870,1.22500,534,0.962222,0.995025,0.749064,0.854701,0.033589,0.500,0.200000,3,0,0,0.00018,1.00,1
+1,60,60,2,0,20.0,226205.964,1,4847,3600,1247,1247,0,1247,0,4847,0.01709,0.01430,0.02630,0.04600,1.72740,534,0.963333,0.985507,0.764045,0.860759,0.050379,0.500,0.200000,3,0,0,0.00009,1.00,1

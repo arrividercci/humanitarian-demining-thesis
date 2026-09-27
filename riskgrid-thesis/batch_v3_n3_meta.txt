@@ -1,0 +1,8 @@
+=== 2026-09-23T18:43:27.019847700Z ===
+args: --seeds 10 --drones 1,2,4,6,8 --delays 0,20 --min-gain 0.2 --max-obs 3 --out batch_v3_n3.csv
+cpu_logical_cores: 12
+java: 25.0.4 (OpenJDK 64-Bit Server VM)
+os: Windows 11 10.0 amd64
+max_heap_mb: 7980
+onnx_intra_op_threads: 1
+
